@@ -8,31 +8,62 @@ class Client extends EventEmitter {
 		super()
 		this.username = username
 	}
-	async connect() {
+	connect() {
 		this.ws = new ws('ws://irc-ws.chat.twitch.tv:80/', 'irc')
 		
-		const key = await Tools.getKey(this.username)
-		
-		this.ws.onmessage = e => e.data.split("\r\n").filter(m => m).forEach(m => this.processMessage(m))
+		this.ws.onmessage = e => e.data.split("\r\n").forEach(m => m && this.processMessage(m))
 		this.ws.onerror = e => console.log({error: e})
 		this.ws.onclose = e => console.log({close: e})
 		
-		return new Promise(resolve => {
+		return new Promise(async resolve => {
+			const key = await Tools.getKey(this.username) 
 			this.ws.onopen = () => {
-				this.ws.send(`PASS ${key}`)
-				this.ws.send(`NICK ${this.username}`)
+				this.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership')
+				this.send(`PASS ${key}`)
+				this.send(`NICK ${this.username}`)
 				resolve()
 			}
 		})
 	}
+	send(str) {
+		this.emit('ws_out', str)
+		this.ws.send(str)
+	}
 	join(channel) {
-		this.ws.send(`JOIN #${channel}`);
+		this.send(`JOIN #${channel}`)
 	}
-	processMessage(mess) {
-		let {prefix: {user}, command, trailing} = parse(mess)
+	part(channel) {
+		this.send(`PART #${channel}`)
+	}
+	say(channel, mess) {
+		this.emit('msg_out', channel, mess)
+		this.send(`PRIVMSG #${channel} :${mess}`)
+	}
+	processMessage(msg) {
+		this.emit('ws_in', msg)
 		
-		console.log({mess: mess, parsed: {user, command, trailing}})
+		const {prefix, command, trailing, params} = parse(msg)
+		
+		const getChannel = () => params[0].substr(1)
+		
+		switch(command) {
+			case 'PING':
+				this.send('PONG :tmi.twitch.tv')
+				return
+			case 'JOIN':
+				if(prefix.user == this.username)
+					return
+				this.emit('join', getChannel(), prefix.user)
+				break
+			case 'PART':
+				this.emit('part', getChannel(), prefix.user)
+				break
+			case 'PRIVMSG':
+				this.emit('msg_in', getChannel(), prefix.user, trailing)
+				break
+		}
 	}
+	
 }
 
 module.exports = Client
