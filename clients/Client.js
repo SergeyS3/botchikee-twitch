@@ -1,13 +1,17 @@
-const Tools = require('../Tools')
+const IrcParser = require('../tools/IrcParser')
 const EventEmitter = require('events').EventEmitter
 const ws = require('ws')
-const {parse} = require('tekko')
+const keys = require('../data/keys.json')
 
 class Client extends EventEmitter {
 	constructor(username) {
 		super()
 		this.username = username
+		
+		if(!keys[this.username])
+			throw new Error(`key for ${this.username} not found`)
 	}
+	
 	connect() {
 		this.ws = new ws('ws://irc-ws.chat.twitch.tv:80/', 'irc')
 		
@@ -15,55 +19,59 @@ class Client extends EventEmitter {
 		this.ws.onerror = e => console.log({error: e})
 		this.ws.onclose = e => console.log({close: e})
 		
-		return new Promise(async resolve => {
-			const key = await Tools.getKey(this.username) 
+		return new Promise(resolve => {
 			this.ws.onopen = () => {
 				this.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership')
-				this.send(`PASS ${key}`)
+				this.send(`PASS ${keys[this.username]}`)
 				this.send(`NICK ${this.username}`)
 				resolve()
 			}
 		})
 	}
+	
 	send(str) {
 		this.emit('ws_out', str)
 		this.ws.send(str)
 	}
+	
 	join(channel) {
 		this.send(`JOIN #${channel}`)
 	}
+	
 	part(channel) {
 		this.send(`PART #${channel}`)
 	}
-	say(channel, mess) {
-		this.emit('msg_out', channel, mess)
-		this.send(`PRIVMSG #${channel} :${mess}`)
+	
+	say(channel, msg) {
+		this.emit('msg_out', channel, msg)
+		this.send(`PRIVMSG #${channel} :${msg}`)
 	}
+	
 	processMessage(msg) {
 		this.emit('ws_in', msg)
 		
-		const {prefix, command, trailing, params} = parse(msg)
-		
-		const getChannel = () => params[0].substr(1)
+		const {command, channel, user, params, tags} = IrcParser.parse(msg)
 		
 		switch(command) {
+			case '353':
+				params[3].split(' ').forEach( user => this.emit('join', channel, user) )
+				break
 			case 'PING':
 				this.send('PONG :tmi.twitch.tv')
 				return
 			case 'JOIN':
-				if(prefix.user == this.username)
+				if(user === this.username)
 					return
-				this.emit('join', getChannel(), prefix.user)
+				this.emit('join', channel, user)
 				break
 			case 'PART':
-				this.emit('part', getChannel(), prefix.user)
+				this.emit('part', channel, user)
 				break
 			case 'PRIVMSG':
-				this.emit('msg_in', getChannel(), prefix.user, trailing)
+				this.emit('msg_in', channel, user, params[1], tags)
 				break
 		}
 	}
-	
 }
 
 module.exports = Client
