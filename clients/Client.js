@@ -24,7 +24,7 @@ class Client extends EventEmitter {
 				this.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership')
 				this.send(`PASS ${keys[this.username]}`)
 				this.send(`NICK ${this.username}`)
-				resolve()
+				this.once('connected', resolve)
 			}
 		})
 	}
@@ -55,6 +55,9 @@ class Client extends EventEmitter {
 		switch(command) {
 			case '353':
 				params[3].split(' ').forEach( user => this.emit('join', channel, user) )
+				break
+			case '372':
+				this.emit('connected');
 				break
 			case 'PING':
 				this.send('PONG :tmi.twitch.tv')
