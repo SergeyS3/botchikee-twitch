@@ -1,15 +1,15 @@
 const Botchikee = require('./clients/Botchikee')
+const Logger = require('./modules/Logger/File')
+const path = require('path')
+
 
 const Bot = new Botchikee()
 
 ;(async () => {
 	try {
-		Bot.on('ws_in', msg => console.log(`> ${msg}`) )
-		
+		new Logger(Bot, path.join(__dirname, 'data/logs/full'))
 		await Bot.connect()
-		
-		Bot.on('ws_out', msg => console.log(`< ${msg}`) )
-		
+
 		Bot.join('airchikee')
 	} catch (e) {
 		console.error(e)
