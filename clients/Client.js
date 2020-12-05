@@ -11,7 +11,6 @@ class Client extends EventEmitter {
 		if(!keys[this.username])
 			throw new Error(`key for ${this.username} not found`)
 	}
-	
 	connect() {
 		this.ws = new ws('ws://irc-ws.chat.twitch.tv:80/', 'irc')
 		
@@ -28,36 +27,32 @@ class Client extends EventEmitter {
 			}
 		})
 	}
-	
 	send(str) {
 		this.emit('ws_out', str)
 		this.ws.send(str)
 	}
-	
 	join(channel) {
 		this.send(`JOIN #${channel}`)
 	}
-	
 	part(channel) {
 		this.send(`PART #${channel}`)
 	}
-	
 	say(channel, msg) {
 		this.emit('msg_out', channel, msg)
 		this.send(`PRIVMSG #${channel} :${msg}`)
 	}
-	
 	processMessage(msg) {
-		this.emit('ws_in', msg)
+		const parsedMsg = IrcParser.parse(msg)
+		const {command, channel, user, params, tags} = parsedMsg
 		
-		const {command, channel, user, params, tags} = IrcParser.parse(msg)
+		this.emit('ws_in', parsedMsg)
 		
 		switch(command) {
 			case '353':
 				params[3].split(' ').forEach( user => this.emit('join', channel, user) )
 				break
 			case '372':
-				this.emit('connected');
+				this.emit('connected')
 				break
 			case 'PING':
 				this.send('PONG :tmi.twitch.tv')

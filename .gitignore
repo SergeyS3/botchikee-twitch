@@ -1,6 +1,4 @@
 .idea
 *.iml
-keys
 node_modules
-package-lock.json
 data

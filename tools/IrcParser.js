@@ -1,5 +1,4 @@
 const {parse} = require('tekko')
-const trusted = require('../data/trusted.json')
 
 class IrcParser {
 	static parse(msg) {
@@ -14,9 +13,8 @@ class IrcParser {
 			tags
 		}
 	}
-	
 	static getChannel(command, params) {
-		let k = -1;
+		let k = -1
 		switch(command) {
 			case '353':
 				k = 2
@@ -37,7 +35,6 @@ class IrcParser {
 		if(~k)
 			return params[k].substr(1)
 	}
-	
 	static getUser(command, params, tags, prefix = {}) {
 		switch(command) {
 			case '353':

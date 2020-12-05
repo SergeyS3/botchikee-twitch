@@ -1,5 +1,2 @@
 #!/bin/bash
-
-FORMAT='%d.%m.%Y_%H:%M:%S';
-
-node . > >(ts $FORMAT >> ./data/logs/full.log) 2> >(ts $FORMAT >> ./data/logs/error.log)
+node . 2> >(ts '%d.%m.%Y_%H:%M:%S' >> ./data/logs/error.log)
