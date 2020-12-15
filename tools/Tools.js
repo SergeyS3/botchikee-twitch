@@ -8,6 +8,9 @@ class Tools {
 	static getTime() {
 		return new Date().toTimeString().substr(0, 8)
 	}
+	static rand(min, max){
+		return (Math.random() * (++max - min) >> 0) + min
+	}
 }
 
 module.exports = Tools
