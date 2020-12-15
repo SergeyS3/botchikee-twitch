@@ -5,8 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "./start",
-    "console": "node console"
+    "start": "./start"
   },
   "author": "",
   "license": "ISC",
