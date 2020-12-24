@@ -12,7 +12,11 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "minimist": "^1.2.5",
+    "mongoose": "^5.11.8",
     "tekko": "^2.4.0",
     "ws": "^7.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
   }
 }
