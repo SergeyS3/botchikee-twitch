@@ -1,14 +1,14 @@
 const IrcParser = require('../tools/IrcParser')
 const EventEmitter = require('events').EventEmitter
 const ws = require('ws')
-const keys = require('../data/keys.json')
+const tokens = require('../data/tokens')
 
 class Client extends EventEmitter {
 	constructor(username) {
 		super()
 		this.username = username
 		
-		if(!keys[this.username])
+		if(!tokens[this.username])
 			throw new Error(`key for ${this.username} not found`)
 	}
 	connect() {
@@ -21,7 +21,7 @@ class Client extends EventEmitter {
 		return new Promise(resolve => {
 			this.ws.onopen = () => {
 				this.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership')
-				this.send(`PASS ${keys[this.username]}`)
+				this.send(`PASS ${tokens[this.username]}`)
 				this.send(`NICK ${this.username}`)
 				this.once('connected', resolve)
 			}

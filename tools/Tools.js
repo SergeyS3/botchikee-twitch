@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 
 class Tools {
 	static getDate() {
@@ -10,6 +11,19 @@ class Tools {
 	}
 	static rand(min, max){
 		return (Math.random() * (++max - min) >> 0) + min
+	}
+	static async connectDB() {
+		await mongoose.connect('mongodb://localhost/botchikee', {
+			useNewUrlParser: true,
+			useFindAndModify: false,
+			useUnifiedTopology: true
+		})
+		mongoose.set('toJSON', {
+			virtuals: true,
+			transform: (doc, converted) => {
+				delete converted._id
+			}
+		})
 	}
 }
 

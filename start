@@ -1,2 +1,0 @@
-#!/bin/bash
-node . 2> >(ts '%d.%m.%Y_%H:%M:%S' >> ./data/logs/error.log)
