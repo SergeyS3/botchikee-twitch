@@ -5,12 +5,14 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "./start"
+    "start": "./start.sh",
+    "api": "./api/start.sh"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.0",
+    "express": "^4.17.1",
     "minimist": "^1.2.5",
     "mongoose": "^5.11.8",
     "tekko": "^2.4.0",

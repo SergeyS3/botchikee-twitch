@@ -1,5 +1,5 @@
 const ChatMessage = require('../tools/ChatMessage')
-const mongoose = require('mongoose')
+const Tools = require("../tools/Tools");
 const AnswerModel = require('../models/answer')
 
 class Answer {
@@ -9,19 +9,19 @@ class Answer {
 		Client.on('msg_in', this.msgIn.bind(this))
 	}
 	async setAnswers() {
-		await mongoose.connect('mongodb://localhost/botchikee', {
-			useNewUrlParser: true,
-			useUnifiedTopology: true
-		})
-		
 		this.answers = await AnswerModel.find()
 	}
 	async msgIn(channel, user, msg) {
 		if(user == this.username)
 			return
 		
-		if(!this.answers)
+		if(!this.answers) {
+			await Tools.connectDB()
+			
 			await this.setAnswers()
+			
+			AnswerModel.watch().on('change', () => this.setAnswers())
+		}
 		
 		const chatMessage = new ChatMessage(channel, user, msg)
 		const answer = await chatMessage.makeAnswer(this.answers)
