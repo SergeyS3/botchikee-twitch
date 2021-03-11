@@ -1,3 +1,4 @@
+const debug = require('debug')('ChatMessage')
 const Tools = require('./Tools')
 
 class ChatMessage {
@@ -37,7 +38,7 @@ class ChatMessage {
 		try {
 			return this.replaceAnswerVars(answer.answer)
 		} catch (e) {
-			console.error(e)
+			debug(`Error: ${e.message}`)
 		}
 		return ''
 	}
@@ -54,9 +55,9 @@ class ChatMessage {
 				searchVal: /\$args{([^}]*)}/,
 				getReplacement: ([,argN]) => {
 					if(!argN)
-						throw 'bad $args args'
+						throw new Error('bad $args args')
 					if(!this.args[argN] || this.args[argN].includes('$args{'))
-						throw 'wrong $args args'
+						throw new Error('wrong $args args')
 					
 					return this.args[argN]
 				}
@@ -65,11 +66,11 @@ class ChatMessage {
 				getReplacement: ([,arg]) => {
 					const match = arg.match(/(\d+)-(\d+)/)
 					if(!match)
-						throw 'bad $rand args'
+						throw new Error('bad $rand args')
 					const min = +match[1],
 						max = +match[2]
 					if(min > max)
-						throw 'wrong $rand args'
+						throw new Error('wrong $rand args')
 					
 					return Tools.rand(min, max)
 				}

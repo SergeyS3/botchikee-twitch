@@ -1,6 +1,7 @@
 const IrcParser = require('../tools/IrcParser')
 const EventEmitter = require('events').EventEmitter
 const ws = require('ws')
+const debug = require('debug')('ws')
 const tokens = require('../data/tokens')
 
 class Client extends EventEmitter {
@@ -28,6 +29,8 @@ class Client extends EventEmitter {
 		})
 	}
 	send(str) {
+		debug(`< ${str}`)
+		
 		this.emit('ws_out', str)
 		this.ws.send(str)
 	}
@@ -42,6 +45,9 @@ class Client extends EventEmitter {
 		this.send(`PRIVMSG #${channel} :${msg}`)
 	}
 	processMessage(msg) {
+		debug(`< ${msg}`)
+
+		
 		const parsedMsg = IrcParser.parse(msg)
 		const {command, channel, user, params, tags} = parsedMsg
 		
