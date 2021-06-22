@@ -6,9 +6,11 @@ class FileStreamPipe {
 		this.readable = new Stream.Readable({ read(){} })
 		this.path = filepath
 	}
+	
 	get path() {
 		return this.writeStream.path
 	}
+	
 	set path(filepath) {
 		if(this.writeStream) {
 			if(this.path === filepath)
@@ -20,6 +22,7 @@ class FileStreamPipe {
 		this.writeStream = fs.createWriteStream(filepath, {flags: 'a'})
 		this.readable.pipe(this.writeStream)
 	}
+	
 	write(str) {
 		this.readable.push(str)
 	}

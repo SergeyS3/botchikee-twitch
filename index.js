@@ -1,17 +1,20 @@
-const Botchikee = require('./clients/Botchikee')
-const Logger = require('./modules/Logger/File')
+const ModularBot = require('./clients/ModularBot')
+const FileLogger = require('./modules/Logger/File')
 const Answer = require('./modules/Answer')
 const path = require('path')
 
-
-const Bot = new Botchikee()
+const Bot = new ModularBot('botchikee')
 
 ;(async () => {
 	try {
-		new Logger(Bot, path.join(__dirname, 'data/logs/full'))
-		new Answer(Bot)
-		await Bot.connect()
-
+		await Bot.start({
+			moduleManagement: 'db',
+			modules: new Map([
+				[FileLogger, path.join(__dirname, 'data/logs/full')],
+				[Answer],
+			])
+		})
+		
 		Bot.join('airchikee')
 	} catch (e) {
 		console.error(e)

@@ -14,6 +14,7 @@ class ChatMessage {
 			this.command = this.args.shift()
 		}
 	}
+	
 	async makeAnswer(answers) {
 		const answer = answers.find(a => {
 			if(
@@ -42,6 +43,7 @@ class ChatMessage {
 		}
 		return ''
 	}
+	
 	replaceAnswerVars(answer) {
 		if(!answer)
 			return ''
@@ -55,9 +57,9 @@ class ChatMessage {
 				searchVal: /\$args{([^}]*)}/,
 				getReplacement: ([,argN]) => {
 					if(!argN)
-						throw new Error('bad $args args')
+						throw Error('bad $args args')
 					if(!this.args[argN] || this.args[argN].includes('$args{'))
-						throw new Error('wrong $args args')
+						throw Error('wrong $args args')
 					
 					return this.args[argN]
 				}
@@ -66,16 +68,16 @@ class ChatMessage {
 				getReplacement: ([,arg]) => {
 					const match = arg.match(/(\d+)-(\d+)/)
 					if(!match)
-						throw new Error('bad $rand args')
+						throw Error('bad $rand args')
 					const min = +match[1],
 						max = +match[2]
 					if(min > max)
-						throw new Error('wrong $rand args')
+						throw Error('wrong $rand args')
 					
 					return Tools.rand(min, max)
 				}
 			},
-		].some( ({searchVal, getReplacement}) => {
+		].some(({ searchVal, getReplacement }) => {
 			if(typeof searchVal == 'string')
 				match = answer.includes(searchVal) ? [searchVal] : ''
 			else

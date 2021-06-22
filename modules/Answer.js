@@ -1,27 +1,46 @@
 const ChatMessage = require('../tools/ChatMessage')
-const Tools = require("../tools/Tools");
+const Module = require('./Module')
 const AnswerModel = require('../models/answer')
 
-class Answer {
-	constructor(Client, params) {
-		this.Client = Client
-		this.params = params
-		Client.on('msg_in', this.msgIn.bind(this))
+class Answer extends Module {
+	static usingDb = true
+	get name() {
+		return 'Answer'
 	}
-	async setAnswers() {
+	
+	constructor() {
+		super()
+		
+		this.msgIn = this.msgIn.bind(this)
+		this.setAnswersFromDB = this.setAnswersFromDB.bind(this)
+		this.modelChangeStream = AnswerModel.watch()
+	}
+	
+	async activate() {
+		super.activate()
+		
+		await this.setAnswersFromDB()
+		
+		this.modelChangeStream.on('change', this.setAnswersFromDB)
+		
+		this.Client.on('msg_in', this.msgIn)
+	}
+	
+	async deactivate() {
+		super.deactivate()
+		
+		this.Client.off('msg_in', this.msgIn)
+		
+		this.modelChangeStream.off('change', this.setAnswersFromDB)
+	}
+	
+	async setAnswersFromDB() {
 		this.answers = await AnswerModel.find()
 	}
+	
 	async msgIn(channel, user, msg) {
-		if(user == this.username)
+		if(user == this.username || !this.checkChannel(channel))
 			return
-		
-		if(!this.answers) {
-			await Tools.connectDB()
-			
-			await this.setAnswers()
-			
-			AnswerModel.watch().on('change', () => this.setAnswers())
-		}
 		
 		const chatMessage = new ChatMessage(channel, user, msg)
 		const answer = await chatMessage.makeAnswer(this.answers)

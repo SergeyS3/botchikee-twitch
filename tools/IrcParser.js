@@ -13,6 +13,7 @@ class IrcParser {
 			tags
 		}
 	}
+	
 	static getChannel(command, params) {
 		let k = -1
 		switch(command) {
@@ -35,6 +36,7 @@ class IrcParser {
 		if(~k)
 			return params[k].substr(1)
 	}
+	
 	static getUser(command, params, tags, prefix = {}) {
 		switch(command) {
 			case '353':
