@@ -1,12 +1,17 @@
 const Logger = require('./Logger')
 const chalk = require('chalk')
 
-class Console extends Logger{
-	constructor(Client, userColors) {
-		super(Client);
+class Console extends Logger {
+	get name() {
+		return 'Console logger'
+	}
+	
+	constructor(userColors) {
+		super()
 		this.userColors = userColors
 	}
-	log({raw, user, channel, command, params, tags}) {
+	
+	log({ raw, user, channel, command, params, tags }) {
 		let msg,
 			terminalColor = 'C0C0C0'
 		

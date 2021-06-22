@@ -4,12 +4,17 @@ const Tools = require('../../tools/Tools')
 const FileStream = require('../../tools/FileStreamPipe')
 
 class File extends Logger {
-	constructor(Client, logsDir) {
-		super(Client)
+	get name() {
+		return 'File logger'
+	}
+	
+	constructor(logsDir) {
+		super()
 		
 		this.logsDir = logsDir
 		this.fileStreams = {}
 	}
+	
 	async getFileStream(channel) {
 		const dir = `${this.logsDir}/${channel || 'global'}`,
 			filepath = `${dir}/${Tools.getDate()}.log`,
@@ -23,7 +28,8 @@ class File extends Logger {
 		}
 		return fileStreams[dir]
 	}
-	log({channel, raw}, prefix) {
+	
+	log({ channel, raw }, prefix) {
 		const str = `${Tools.getTime()} ${prefix} ${raw}\n`
 		this.getFileStream(channel).then(fileStream => fileStream.write(str))
 	}

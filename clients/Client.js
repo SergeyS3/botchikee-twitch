@@ -10,40 +10,46 @@ class Client extends EventEmitter {
 		this.username = username
 		
 		if(!tokens[this.username])
-			throw new Error(`key for ${this.username} not found`)
+			throw Error(`key for ${this.username} not found`)
 	}
+	
 	connect() {
 		this.ws = new ws('ws://irc-ws.chat.twitch.tv:80/', 'irc')
 		
 		this.ws.onmessage = e => e.data.split("\r\n").forEach(m => m && this.processMessage(m))
-		this.ws.onerror = e => console.log({error: e})
-		this.ws.onclose = e => console.log({close: e})
+		this.ws.onerror = e => console.error(e)
+		this.ws.onclose = e => console.error(e)
 		
 		return new Promise(resolve => {
 			this.ws.onopen = () => {
 				this.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership')
-				this.send(`PASS ${tokens[this.username]}`)
+				this.send(`PASS oauth:${tokens[this.username]}`)
 				this.send(`NICK ${this.username}`)
 				this.once('connected', resolve)
 			}
 		})
 	}
+	
 	send(str) {
 		debug(`< ${str}`)
 		
 		this.emit('ws_out', str)
 		this.ws.send(str)
 	}
+	
 	join(channel) {
 		this.send(`JOIN #${channel}`)
 	}
+	
 	part(channel) {
 		this.send(`PART #${channel}`)
 	}
+	
 	say(channel, msg) {
 		this.emit('msg_out', channel, msg)
 		this.send(`PRIVMSG #${channel} :${msg}`)
 	}
+	
 	processMessage(msg) {
 		debug(`< ${msg}`)
 
