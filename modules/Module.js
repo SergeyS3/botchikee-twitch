@@ -1,30 +1,44 @@
 const debug = require('debug')('Module')
 
 class Module {
+	name
 	static usingDb = false
+	Client
+	dependencies = []
+	static submodules = []
 	channels = []
 	active = false
-	get name() {
-		return ''
-	}
-	
-	constructor() {
-		if(!this.name)
-			throw Error('module must have a name')
-	}
 	
 	activate() {
 		this.active = true
-		debug(`module ${this.name} activated`)
+		
+		for(const submoduleClass of this.dependencies)
+			this.getSubmoduleInstance(submoduleClass).addModule(this)
+		
+		debug(`${this.name} activated`)
 	}
 	
 	deactivate() {
 		this.active = false
-		debug(`module ${this.name} deactivated`)
+		
+		for(const submoduleClass of this.dependencies)
+			this.getSubmoduleInstance(submoduleClass).removeModule(this)
+		
+		debug(`${this.name} deactivated`)
 	}
 	
 	checkChannel(channel) {
 		return !this.channels.length || this.channels.includes(channel)
+	}
+	
+	getSubmoduleInstance(submoduleClass) {
+		let instance = Module.submodules.find(sm => sm instanceof submoduleClass)
+		if(!instance) {
+			instance = new submoduleClass()
+			instance.Client = this.Client
+			Module.submodules.push(instance)
+		}
+		return instance
 	}
 }
 

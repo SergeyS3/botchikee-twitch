@@ -3,10 +3,8 @@ const Module = require('./Module')
 const AnswerModel = require('../models/answer')
 
 class Answer extends Module {
+	name = 'Answer'
 	static usingDb = true
-	get name() {
-		return 'Answer'
-	}
 	
 	constructor() {
 		super()
