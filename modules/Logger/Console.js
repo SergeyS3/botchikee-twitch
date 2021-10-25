@@ -2,9 +2,7 @@ const Logger = require('./Logger')
 const chalk = require('chalk')
 
 class Console extends Logger {
-	get name() {
-		return 'Console logger'
-	}
+	name = 'Console logger'
 	
 	constructor(userColors) {
 		super()

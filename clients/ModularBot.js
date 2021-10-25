@@ -39,16 +39,16 @@ class ModularBot extends Client {
 	}
 	
 	async start({ moduleManagement, modules }) {
-		if(moduleManagement == 'db' || [...modules.keys()].find(m => m.usingDb)) 
+		if(moduleManagement === 'db' || [...modules.keys()].find(m => m.usingDb)) 
 			await Tools.connectDB()
 		
 		for(const [moduleClass, moduleParams] of modules) {
-			module = new moduleClass(moduleParams)
+			const module = new moduleClass(moduleParams)
 			module.Client = this
 			this.modules.push(module)
 		}
 		
-		if(moduleManagement == 'db') {
+		if(moduleManagement === 'db') {
 			await this.setModulesFromDB()
 			
 			ModuleModel.watch().on('change', this.setModulesFromDB)

@@ -53,7 +53,6 @@ class Client extends EventEmitter {
 	processMessage(msg) {
 		debug(`< ${msg}`)
 
-		
 		const parsedMsg = IrcParser.parse(msg)
 		const {command, channel, user, params, tags} = parsedMsg
 		
@@ -78,7 +77,7 @@ class Client extends EventEmitter {
 				this.emit('part', channel, user)
 				break
 			case 'PRIVMSG':
-				this.emit('msg_in', channel, user, params[1], tags)
+				this.emit('msg_in', channel, user, params[1].trim(), tags)
 				break
 		}
 	}

@@ -4,9 +4,7 @@ const Tools = require('../../tools/Tools')
 const FileStream = require('../../tools/FileStreamPipe')
 
 class File extends Logger {
-	get name() {
-		return 'File logger'
-	}
+	name = 'File logger'
 	
 	constructor(logsDir) {
 		super()
