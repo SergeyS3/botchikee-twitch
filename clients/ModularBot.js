@@ -25,7 +25,7 @@ class ModularBot extends Client {
 			else {
 				module.active = false
 				const newModule = new ModuleModel({
-					channels: module.channels,
+					channels: [],
 					name: module.name,
 					active: false
 				})
@@ -36,6 +36,12 @@ class ModularBot extends Client {
 				}
 			}
 		}
+		
+		const modulesChannels = [...new Set(
+			this.modules.flatMap(m => m.active ? m.channels : [])
+		)]
+		this.channels.forEach(c => !modulesChannels.includes(c) && this.part(c))
+		modulesChannels.forEach(c => !this.channels.includes(c) && this.join(c))
 	}
 	
 	async start({ moduleManagement, modules }) {
@@ -48,6 +54,8 @@ class ModularBot extends Client {
 			this.modules.push(module)
 		}
 		
+		await this.connect()
+		
 		if(moduleManagement === 'db') {
 			await this.setModulesFromDB()
 			
@@ -55,8 +63,6 @@ class ModularBot extends Client {
 		}
 		else
 			await Promise.all(this.modules.map(() => module.activate()))
-		
-		await this.connect()
 	}
 }
 
