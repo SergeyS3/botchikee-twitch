@@ -16,8 +16,6 @@ const Bot = new ModularBot('botchikee')
 				[Pyramid, 3]
 			])
 		})
-		
-		Bot.join('airchikee')
 	} catch (e) {
 		console.error(e)
 	}
