@@ -34,7 +34,7 @@ class Pyramid extends Module {
 	
 	
 	async msgIn(channel, user, msg) {
-		if(user === this.username || !this.checkChannel(channel) || !/^\w{3,15}$/.test(msg))
+		if(user === this.Client.username || !this.checkChannel(channel) || !/^\w{3,15}$/.test(msg))
 			return
 		
 		const pyramidWidth = this.getPyramidWidth(this.queue[channel], user, msg)

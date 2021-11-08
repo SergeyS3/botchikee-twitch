@@ -1,6 +1,6 @@
 const Submodule = require('./Submodule')
 
-class MsgQueue extends Submodule{
+class MsgQueue extends Submodule {
 	name = 'MsgQueue'
 	queue = {}
 	static length = 100
