@@ -6,6 +6,7 @@ const router = Router()
 router.get('/', async (req, res) => {
 	try {
 		const modules = await Module.find()
+			.sort('name')
 			.select('id active name channels')
 		
 		res.json(modules)

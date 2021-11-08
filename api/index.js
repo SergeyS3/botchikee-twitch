@@ -21,7 +21,7 @@ app.use('/answers', answerRoutes)
 app.use(errorHandler)
 
 
-;(async function() {
+;(async () => {
 	try {
 		await Tools.connectDB()
 		app.listen(port)
