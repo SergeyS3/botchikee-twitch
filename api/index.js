@@ -4,6 +4,8 @@ const Tools = require('../tools/Tools')
 
 const moduleRoutes = require('./routes/modules')
 const answerRoutes = require('./routes/answers')
+const modReplacementRoutes = require('./routes/mod-replacements')
+const modBanWordRoutes = require('./routes/mod-ban-words')
 const authHandler = require('./middleware/auth')
 const errorHandler = require('./middleware/error')
 
@@ -18,6 +20,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(authHandler)
 app.use('/modules', moduleRoutes)
 app.use('/answers', answerRoutes)
+app.use('/mod-replacements', modReplacementRoutes)
+app.use('/mod-ban-words', modBanWordRoutes)
 app.use(errorHandler)
 
 
