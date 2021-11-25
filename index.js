@@ -4,6 +4,7 @@ const Answer = require('./modules/Answer')
 const Pyramid = require('./modules/Pyramid')
 const Select = require('./modules/Select')
 const Spam = require('./modules/Spam')
+const Mod = require('./modules/Mod')
 const path = require('path')
 
 const Bot = new ModularBot('botchikee')
@@ -17,7 +18,8 @@ const Bot = new ModularBot('botchikee')
 				[Answer],
 				[Pyramid, 3],
 				[Select],
-				[Spam, ['modchikee', 'memechikee']]
+				[Spam, ['modchikee', 'memechikee']],
+				[Mod]
 			])
 		})
 	} catch (e) {

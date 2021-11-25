@@ -1,6 +1,7 @@
+const EventEmitter = require('events').EventEmitter
 const debug = require('debug')('Module')
 
-class Module {
+class Module extends EventEmitter {
 	name
 	static usingDb = false
 	Client

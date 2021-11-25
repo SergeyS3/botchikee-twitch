@@ -91,6 +91,22 @@ class Client extends EventEmitter {
 		this.send(`PRIVMSG #${channel} :${msg}`)
 	}
 	
+	ban(channel, username, reason) {
+		this.say(channel, `/ban ${username} ${reason}`)
+	}
+	
+	unban(channel, username) {
+		this.say(channel, `/unban ${username}`)
+	}
+	
+	timeout(channel, username, duration, reason) {
+		this.say(channel, `/timeout ${username} ${duration} ${reason}`)
+	}
+	
+	untimeout(channel, username) {
+		this.say(channel, `/untimeout ${username}`)
+	}
+	
 	onMessage(msg) {
 		debug(`> ${msg}`)
 
