@@ -86,25 +86,37 @@ class Client extends EventEmitter {
 		this.channels = this.channels.filter(c => c !== channel)
 	}
 	
-	say(channel, msg) {
+	say(channel, msg, unsafe = false) {
+		if(!unsafe && ['.', '/'].includes(msg[0]))
+			msg = msg.substr(1)
+		
+		if(msg.length > 500) {
+			const chunks = msg.match(/.{1,500}/g)
+			if(unsafe || chunks.length < 4)
+				for(const chunk of chunks)
+					this.say(channel, chunk, unsafe)
+			
+			return
+		}
+		
 		this.emit('msg_out', channel, msg)
 		this.send(`PRIVMSG #${channel} :${msg}`)
 	}
 	
 	ban(channel, username, reason) {
-		this.say(channel, `/ban ${username} ${reason}`)
+		this.say(channel, `/ban ${username} ${reason}`, true)
 	}
 	
 	unban(channel, username) {
-		this.say(channel, `/unban ${username}`)
+		this.say(channel, `/unban ${username}`, true)
 	}
 	
 	timeout(channel, username, duration, reason) {
-		this.say(channel, `/timeout ${username} ${duration} ${reason}`)
+		this.say(channel, `/timeout ${username} ${duration} ${reason}`, true)
 	}
 	
 	untimeout(channel, username) {
-		this.say(channel, `/untimeout ${username}`)
+		this.say(channel, `/untimeout ${username}`, true)
 	}
 	
 	onMessage(msg) {
