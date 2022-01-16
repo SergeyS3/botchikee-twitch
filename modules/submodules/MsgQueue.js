@@ -5,8 +5,8 @@ class MsgQueue extends Submodule {
 	queue = {}
 	static length = 100
 	
-	constructor() {
-		super()
+	constructor(Client) {
+		super(Client)
 		
 		this.msgIn = this.msgIn.bind(this)
 		this.msgOut = this.msgOut.bind(this)

@@ -1,10 +1,17 @@
+const EventEmitter = require('events').EventEmitter
+const SubmoduleModel = require('../../models/submodule')
 const debug = require('debug')('Submodule')
 
-class Submodule {
+class Submodule extends EventEmitter {
 	name
 	Client
 	modules = []
 	active = false
+	
+	constructor(Client) {
+		super()
+		this.Client = Client
+	}
 	
 	activate() {
 		this.active = true
@@ -25,6 +32,8 @@ class Submodule {
 		
 		if(!this.active)
 			this.activate()
+		
+		this.setDataToDB()
 	}
 	
 	removeModule(module) {
@@ -34,6 +43,19 @@ class Submodule {
 		
 		if(!this.modules.length)
 			this.deactivate()
+		
+		this.setDataToDB()
+	}
+	
+	async setDataToDB() {
+		await SubmoduleModel.findOneAndUpdate(
+			{ name: this.name },
+			{
+				modules: this.modules.map(m => m.name),
+				active: this.active
+			},
+			{ upsert: true }
+		)
 	}
 }
 

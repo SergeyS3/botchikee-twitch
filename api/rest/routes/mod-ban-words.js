@@ -1,5 +1,5 @@
-const ModBanWord = require('../../models/modBanWord')
-const {Router} = require('express')
+const ModBanWord = require('../../../models/modBanWord')
+const { Router } = require('express')
 const checkId = require('../middleware/checkId')(ModBanWord)
 const router = Router()
 

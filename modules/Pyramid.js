@@ -8,8 +8,8 @@ class Pyramid extends Module {
 	]
 	minWidth
 	
-	constructor(minWidth) {
-		super()
+	constructor(Client, minWidth) {
+		super(Client)
 		
 		this.minWidth = minWidth || 3
 		

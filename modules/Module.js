@@ -10,12 +10,19 @@ class Module extends EventEmitter {
 	channels = []
 	active = false
 	
+	constructor(Client) {
+		super()
+		
+		this.Client = Client
+	}
+	
 	activate() {
 		this.active = true
 		
 		for(const submoduleClass of this.dependencies)
 			this.getSubmoduleInstance(submoduleClass).addModule(this)
 		
+		this.emit('activate')
 		debug(`${this.name} activated`)
 	}
 	
@@ -25,6 +32,7 @@ class Module extends EventEmitter {
 		for(const submoduleClass of this.dependencies)
 			this.getSubmoduleInstance(submoduleClass).removeModule(this)
 		
+		this.emit('deactivate')
 		debug(`${this.name} deactivated`)
 	}
 	
@@ -35,8 +43,7 @@ class Module extends EventEmitter {
 	getSubmoduleInstance(submoduleClass) {
 		let instance = Module.submodules.find(sm => sm instanceof submoduleClass)
 		if(!instance) {
-			instance = new submoduleClass()
-			instance.Client = this.Client
+			instance = new submoduleClass(this.Client)
 			Module.submodules.push(instance)
 		}
 		return instance

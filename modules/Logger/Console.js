@@ -4,8 +4,8 @@ const chalk = require('chalk')
 class Console extends Logger {
 	name = 'Console logger'
 	
-	constructor(userColors) {
-		super()
+	constructor(Client, userColors) {
+		super(Client)
 		this.userColors = userColors
 	}
 	

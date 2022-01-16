@@ -16,15 +16,19 @@ class Mod extends Module {
 	replacements = []
 	banWords = []
 	
-	constructor() {
-		super()
+	constructor(Client) {
+		super(Client)
 		
 		this.setDataFromDB = this.setDataFromDB.bind(this)
 		this.msgIn = this.msgIn.bind(this)
-		this.commandIn = this.commandIn.bind(this)
+		this.addBanWordCommand = this.addBanWordCommand.bind(this)
 		
 		this.replacementModelChangeStream = ModReplacementModel.watch()
 		this.banWordModelChangeStream = ModBanWordModel.watch()
+		
+		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
+			['!banword', this.addBanWordCommand]
+		]))
 	}
 	
 	async activate() {
@@ -38,13 +42,11 @@ class Mod extends Module {
 		this.queue = this.getSubmoduleInstance(MsgQueue).queue
 		
 		this.Client.on('msg_in', this.msgIn)
-		this.Client.on('command_in', this.commandIn)
 	}
 	
 	deactivate() {
 		super.deactivate()
 		
-		this.Client.off('command_in', this.commandIn)
 		this.Client.off('msg_in', this.msgIn)
 		
 		this.queue = {}
@@ -86,41 +88,35 @@ class Mod extends Module {
 		this.checkMsg(channel, user, msg)
 	}
 	
-	async commandIn(channel, user, command, args) {
-		if(!this.checkChannel(channel) || !args.length)
+	async addBanWordCommand(channel, user, args) {
+		if(!args.length)
 			return
 		
-		if(command === '!banword') {
-			if(users[user] !== 'owner')
-				return
+		const text = args.join(' ')
+		
+		try {
+			this.once('data_set', () => {
+				for(const {user, msg} of this.queue[channel])
+					this.checkMsg(channel, user, msg)
+			})
 			
-			const text = args.join(' ')
-			
-			try {
-				this.once('data_set', () => {
-					for(const {user, msg} of this.queue[channel])
-						this.checkMsg(channel, user, msg)
-				})
-				
-				let banWord = await ModBanWordModel.findOne({ text })
-				if(banWord) {
-					banWord.active = true
-					if(!banWord.channels.includes(channel))
-						banWord.channels.push('airchikee')
-				}
-				else
-					banWord = new ModBanWordModel({
-						active: true,
-						text,
-						channels: [channel]
-					})
-				
-				banWord.save()
-			} catch (e) {
-				console.error(e)
+			let banWord = await ModBanWordModel.findOne({ text })
+			if(banWord) {
+				banWord.active = true
+				if(!banWord.channels.includes(channel))
+					banWord.channels.push('airchikee')
 			}
-		}
+			else
+				banWord = new ModBanWordModel({
+					active: true,
+					text,
+					channels: [channel]
+				})
 			
+			banWord.save()
+		} catch (e) {
+			console.error(e)
+		}
 	}
 	
 	checkMsg(channel, user, msg) {

@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "start": "./start.sh",
-    "api": "./api/start.sh"
+    "dev": "nodemon . --ignore api/",
+    "api": "./api/start.sh",
+    "api-dev": "nodemon api --watch api/"
   },
   "author": "",
   "license": "ISC",

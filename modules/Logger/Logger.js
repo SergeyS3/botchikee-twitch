@@ -2,8 +2,8 @@ const IrcParser = require('../../tools/IrcParser')
 const Module = require('../Module')
 
 class Logger extends Module{
-	constructor() {
-		super()
+	constructor(Client) {
+		super(Client)
 		
 		this.wsIn = this.wsIn.bind(this)
 		this.wsOut = this.wsOut.bind(this)

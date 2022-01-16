@@ -13,14 +13,18 @@ class Answer extends Module {
 		CommandMsg
 	]
 	
-	constructor() {
-		super()
+	constructor(Client) {
+		super(Client)
 		
 		this.msgIn = this.msgIn.bind(this)
-		this.commandIn = this.commandIn.bind(this)
+		this.sayCommand = this.sayCommand.bind(this)
 		this.setAnswersFromDB = this.setAnswersFromDB.bind(this)
 		
 		this.modelChangeStream = AnswerModel.watch()
+		
+		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
+			['!say', this.sayCommand]
+		]))
 	}
 	
 	async activate() {
@@ -31,14 +35,12 @@ class Answer extends Module {
 		this.modelChangeStream.on('change', this.setAnswersFromDB)
 		
 		this.Client.on('msg_in', this.msgIn)
-		this.Client.on('command_in', this.commandIn)
 	}
 	
 	deactivate() {
 		super.deactivate()
 		
 		this.Client.off('msg_in', this.msgIn)
-		this.Client.off('command_in', this.commandIn)
 		
 		this.modelChangeStream.off('change', this.setAnswersFromDB)
 	}
@@ -73,19 +75,8 @@ class Answer extends Module {
 			this.answer(channel, answer.answer, user, args)
 	}
 	
-	commandIn(channel, user, command, args) {
-		if(!this.checkChannel(channel))
-			return
-		
-		switch(command) {
-			case '!say':
-				if(users[user] !== 'owner')
-					return
-				
-				this.answer(channel, args.join(' '), user, args)
-				
-				break;
-		}
+	sayCommand(channel, user, args) {
+		this.answer(channel, args.join(' '), user, args)
 	}
 	
 	answer(channel, answer, user, args) {
