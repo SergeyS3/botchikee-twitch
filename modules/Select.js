@@ -8,30 +8,21 @@ class Select extends Module {
 		CommandMsg
 	]
 	
-	constructor() {
-		super()
+	constructor(Client) {
+		super(Client)
 		
-		this.commandIn = this.commandIn.bind(this)
+		this.selectCommand = this.selectCommand.bind(this)
+		
+		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
+			['!select', this.selectCommand]
+		]))
 	}
 	
-	activate() {
-		super.activate()
-		
-		this.Client.on('command_in', this.commandIn)
-	}
-	
-	deactivate() {
-		super.deactivate()
-		
-		this.Client.off('command_in', this.commandIn)
-	}
-	
-	commandIn(channel, user, command, args) {
-		if(!this.checkChannel(channel) || !args.length)
+	selectCommand(channel, user, args) {
+		if(!args.length)
 			return
 		
-		if(command === '!select')
-			this.Client.say(channel, args[Tools.rand(0, args.length - 1)])
+		this.Client.say(channel, args[Tools.rand(0, args.length - 1)])
 			
 	}
 }

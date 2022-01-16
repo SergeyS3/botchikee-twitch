@@ -16,6 +16,9 @@ class Tools {
 	}
 	
 	static async connectDB() {
+		if(mongoose.connection.readyState)
+			return
+		
 		await mongoose.connect('mongodb://localhost/botchikee', {
 			useNewUrlParser: true,
 			useFindAndModify: false,

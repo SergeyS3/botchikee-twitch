@@ -1,5 +1,5 @@
-const ModReplacement = require('../../models/modReplacement')
-const {Router} = require('express')
+const ModReplacement = require('../../../models/modReplacement')
+const { Router } = require('express')
 const checkId = require('../middleware/checkId')(ModReplacement)
 const router = Router()
 

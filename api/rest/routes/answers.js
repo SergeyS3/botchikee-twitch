@@ -1,5 +1,5 @@
-const Answer = require('../../models/answer')
-const {Router} = require('express')
+const Answer = require('../../../models/answer')
+const { Router } = require('express')
 const checkId = require('../middleware/checkId')(Answer)
 const router = Router()
 

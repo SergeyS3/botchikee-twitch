@@ -6,8 +6,8 @@ const FileStream = require('../../tools/FileStreamPipe')
 class File extends Logger {
 	name = 'File logger'
 	
-	constructor(logsDir) {
-		super()
+	constructor(Client, logsDir) {
+		super(Client)
 		
 		this.logsDir = logsDir
 		this.fileStreams = {}

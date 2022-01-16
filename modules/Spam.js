@@ -10,46 +10,33 @@ class Spam extends Module {
 		CommandMsg
 	]
 	
-	constructor(usernames) {
-		super()
+	constructor(Client, usernames) {
+		super(Client)
 		
 		this.usernames = usernames
 		
-		this.commandIn = this.commandIn.bind(this)
-	}
-	
-	activate() {
-		super.activate()
+		this.spamCommand = this.spamCommand.bind(this)
 		
-		this.Client.on('command_in', this.commandIn)
+		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
+			['!spam', this.spamCommand]
+		]))
 	}
 	
-	deactivate() {
-		super.deactivate()
-		
-		this.Client.off('command_in', this.commandIn)
-	}
-	
-	async commandIn(channel, user, command, args) {
-		if(!this.checkChannel(channel) || !args.length)
+	async spamCommand(channel, user, args) {
+		if(!args.length)
 			return
 		
-		if(command === '!spam') {
-			if(users[user] !== 'owner')
-				return
-			
-			const msg = args.join(' ')
-			
-			this.usernames.forEach(async username => {
-				const Bot = new Client(username)
-				await Bot.connect()
-				Bot.join(channel)
-				Bot.say(channel, msg)
-				Bot.disconnect()
-			})
-			
-			this.Client.say(channel, msg)
-		}
+		const msg = args.join(' ')
+		
+		this.usernames.forEach(async username => {
+			const Bot = new Client(username)
+			await Bot.connect()
+			Bot.join(channel)
+			Bot.say(channel, msg)
+			Bot.disconnect()
+		})
+		
+		this.Client.say(channel, msg)
 	}
 }
 
