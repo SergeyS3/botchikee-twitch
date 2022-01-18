@@ -1,9 +1,11 @@
 const Client = require('./Client')
 const ModuleModel = require('../models/module')
+const SettingsModel = require('../models/settings')
 const Tools = require('../tools/Tools')
 
 class ModularBot extends Client {
 	modules = []
+	settings = {}
 	
 	constructor(username) {
 		super(username)
@@ -36,12 +38,6 @@ class ModularBot extends Client {
 				}
 			}
 		}
-		
-		const modulesChannels = [...new Set(
-			this.modules.flatMap(m => m.active ? m.channels : [])
-		)]
-		this.channels.forEach(c => !modulesChannels.includes(c) && this.part(c))
-		modulesChannels.forEach(c => !this.channels.includes(c) && this.join(c))
 	}
 	
 	async start({ moduleManagement, modules }) {
@@ -56,10 +52,24 @@ class ModularBot extends Client {
 		if(moduleManagement === 'db') {
 			await this.setModulesFromDB()
 			
+			this.setSettings((await SettingsModel.find())[0].toObject())
+			SettingsModel.watch()
+				.on('change', ({ updateDescription: { updatedFields } }) => {
+					this.setSettings(updatedFields)
+				})
+			
 			ModuleModel.watch().on('change', this.setModulesFromDB)
 		}
 		else
 			await Promise.all(this.modules.map(() => module.activate()))
+	}
+	
+	async setSettings(settings) {
+		this.settings = Object.assign(this.settings, settings)
+		if(settings.channels) {
+			this.channels.forEach(c => !this.settings.channels.includes(c) && this.part(c))
+			this.settings.channels.forEach(c => !this.channels.includes(c) && this.join(c))
+		}
 	}
 }
 
