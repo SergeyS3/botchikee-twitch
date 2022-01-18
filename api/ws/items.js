@@ -1,5 +1,6 @@
 const Tools = require('../Tools')
 const WebSocket = require('ws')
+const Settings = require('../../models/settings')
 const Module = require('../../models/module')
 const Submodule = require('../../models/submodule')
 const Answer = require('../../models/answer')
@@ -8,6 +9,10 @@ const ModBanWord = require('../../models/modBanWord')
 const Command = require('../../models/command')
 
 const items = [
+	{
+		model: Settings,
+		path: '/settings'
+	},
 	{
 		model: Module,
 		path: '/modules'
