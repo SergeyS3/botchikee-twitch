@@ -71,6 +71,20 @@ class ModularBot extends Client {
 			this.settings.channels.forEach(c => !this.channels.includes(c) && this.join(c))
 		}
 	}
+	
+	checkChannel(channel, channels) {
+		return this.channels.includes(channel) && (
+			!channels.length //no channels means all channels
+			|| channels.includes(channel
+		))
+	}
+	
+	checkUser(user, users) {
+		return !users.length //no users means all users
+			|| users.includes(user.name)
+			|| user.broadcaster && users.includes('$broadcaster')
+			|| user.mod && users.includes('$mod')
+	}
 }
 
 module.exports = ModularBot

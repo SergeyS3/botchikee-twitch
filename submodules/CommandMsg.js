@@ -1,5 +1,5 @@
 const Submodule = require('./Submodule')
-const CommandModel = require('../../models/command')
+const CommandModel = require('../models/command')
 
 ;(async () => { 
 	await CommandModel.updateMany({}, { $set: { registered: false } })
@@ -32,6 +32,7 @@ class CommandMsg extends Submodule {
 		super.activate()
 		
 		this.modelUsersChangeStream.on('change', this.setCommandsFromDB)
+		
 		this.Client.on('msg_in', this.msgIn)
 	}
 	
@@ -55,7 +56,7 @@ class CommandMsg extends Submodule {
 	}
 	
 	msgIn(channel, user, msg) {
-		if(user === this.Client.username)
+		if(user.self)
 			return
 		
 		let { command, args } = this.constructor.getCommand(msg)
@@ -65,9 +66,9 @@ class CommandMsg extends Submodule {
 					c.active
 					&& c.text === command
 					&& c.module.checkChannel(channel)
-					&& !c.users.length || c.users.includes(user)
+					&& this.Client.checkUser(user, c.users)
 				)
-				.map(c => c.handler(channel, user, args))
+				.map(c => c.handler(args, channel, user))
 	}
 	
 	static getCommand(msg) {

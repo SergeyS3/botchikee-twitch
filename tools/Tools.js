@@ -31,6 +31,14 @@ class Tools {
 			}
 		})
 	}
+	
+	static kebabCaseToCamelCase(str) {
+		return str.replace(/([-_][a-z])/g, group =>
+		    group
+		      .toUpperCase()
+		      .replace('-', '')
+		  )
+	}
 }
 
 module.exports = Tools

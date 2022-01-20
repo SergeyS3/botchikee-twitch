@@ -1,10 +1,8 @@
 const Module = require('./Module')
 const ModReplacementModel = require('../models/modReplacement')
 const ModBanWordModel = require('../models/modBanWord')
-const MsgQueue = require('./submodules/MsgQueue')
-const CommandMsg = require('./submodules/CommandMsg')
-
-const users = require('../data/users')
+const MsgQueue = require('../submodules/MsgQueue')
+const CommandMsg = require('../submodules/CommandMsg')
 
 class Mod extends Module {
 	name = 'Mod'
@@ -20,11 +18,13 @@ class Mod extends Module {
 		super(Client)
 		
 		this.setDataFromDB = this.setDataFromDB.bind(this)
-		this.msgIn = this.msgIn.bind(this)
+		this.checkMsg = this.checkMsg.bind(this)
 		this.addBanWordCommand = this.addBanWordCommand.bind(this)
 		
 		this.replacementModelChangeStream = ModReplacementModel.watch()
 		this.banWordModelChangeStream = ModBanWordModel.watch()
+		
+		this.queue = this.getSubmoduleInstance(MsgQueue).queue
 		
 		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
 			['!banword', this.addBanWordCommand]
@@ -39,17 +39,13 @@ class Mod extends Module {
 		this.replacementModelChangeStream.on('change', this.setDataFromDB)
 		this.banWordModelChangeStream.on('change', this.setDataFromDB)
 		
-		this.queue = this.getSubmoduleInstance(MsgQueue).queue
-		
-		this.Client.on('msg_in', this.msgIn)
+		this.Client.on('msg_in', this.checkMsg)
 	}
 	
 	deactivate() {
 		super.deactivate()
 		
-		this.Client.off('msg_in', this.msgIn)
-		
-		this.queue = {}
+		this.Client.off('msg_in', this.checkMsg)
 		
 		this.banWordModelChangeStream.off('change', this.setDataFromDB)
 		this.replacementModelChangeStream.off('change', this.setDataFromDB)
@@ -76,19 +72,7 @@ class Mod extends Module {
 		this.emit('data_set')
 	}
 	
-	msgIn(channel, user, msg, userInfo) {
-		if(
-			user === this.Client.username
-			|| user === channel
-			|| +userInfo.mod
-			|| !this.checkChannel(channel)
-		)
-			return
-		
-		this.checkMsg(channel, user, msg)
-	}
-	
-	async addBanWordCommand(channel, user, args) {
+	async addBanWordCommand(args, channel) {
 		if(!args.length)
 			return
 		
@@ -96,13 +80,18 @@ class Mod extends Module {
 		
 		try {
 			this.once('data_set', () => {
-				for(const {user, msg} of this.queue[channel])
-					this.checkMsg(channel, user, msg)
+				for(const { user, msg, timeouted } of this.queue[channel]) {
+					if(timeouted || this.checkMsg(channel, user, msg))
+						continue
+					
+					const sameUserMsgs = this.queue[channel].filter(mess => mess.user.name === user.name)
+					for(const sameUserMsg of sameUserMsgs)
+						sameUserMsg.timeouted = true
+				}
 			})
 			
-			let banWord = await ModBanWordModel.findOne({ text })
+			let banWord = await ModBanWordModel.findOne({ active: true, text })
 			if(banWord) {
-				banWord.active = true
 				if(!banWord.channels.includes(channel))
 					banWord.channels.push('airchikee')
 			}
@@ -120,10 +109,26 @@ class Mod extends Module {
 	}
 	
 	checkMsg(channel, user, msg) {
+		if(
+			user.self
+			|| user.broadcaster
+			|| user.mod
+			|| !this.checkChannel(channel)
+		)
+			return true
+		
 		msg = this.normalizeText(msg)
 		
-		if(this.banWords.find(banWord => msg.includes(banWord.text)))
-			this.Client.timeout(channel, user, 5, 'test')
+		const banWord = this.banWords.find(banWord => 
+			msg.includes(banWord.text)
+			&& this.Client.checkChannel(channel, banWord.channels)
+		)
+		if(!banWord)
+			return true
+		
+		this.Client.timeout(channel, user.name, 60 * 60 * 24 * 14, `ban word: ${banWord.text} (id ${banWord.id})`)
+		
+		return false
 	}
 	
 	normalizeText(text) {

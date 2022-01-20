@@ -32,7 +32,7 @@ class MsgQueue extends Submodule {
 	}
 	
 	msgOut(channel, msg) {
-		this.addToQueue(channel, this.Client.username, msg)
+		this.addToQueue(channel, {name: this.Client.username, self: true}, msg)
 	}
 	
 	addToQueue(channel, user, msg) {

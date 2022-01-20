@@ -37,7 +37,7 @@ class Module extends EventEmitter {
 	}
 	
 	checkChannel(channel) {
-		return !this.channels.length || this.channels.includes(channel)
+		return this.Client.checkChannel(channel, this.channels)
 	}
 	
 	getSubmoduleInstance(submoduleClass) {

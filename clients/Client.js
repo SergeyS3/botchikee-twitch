@@ -2,6 +2,7 @@ const IrcParser = require('../tools/IrcParser')
 const EventEmitter = require('events').EventEmitter
 const ws = require('ws')
 const debug = require('debug')('ws')
+const Tools = require('../tools/Tools')
 const tokens = require('../data/tokens')
 
 class Client extends EventEmitter {
@@ -123,7 +124,7 @@ class Client extends EventEmitter {
 		debug(`> ${msg}`)
 
 		const parsedMsg = IrcParser.parse(msg)
-		const {command, channel, user, params, tags} = parsedMsg
+		const { command, channel, user, params, tags } = parsedMsg
 		
 		this.emit('ws_in', parsedMsg)
 		
@@ -142,15 +143,22 @@ class Client extends EventEmitter {
 				this.resetPingLoop()
 				return
 			case 'JOIN':
-				if(user === this.username)
-					return
 				this.emit('join', channel, user)
 				break
 			case 'PART':
 				this.emit('part', channel, user)
 				break
 			case 'PRIVMSG':
-				this.emit('msg_in', channel, user, params[1].trim(), tags)
+				const userInfo = {
+					name: user,
+					self: user === this.username,
+					broadcaster: user === channel,
+				}
+				const isBoolField = key => ['first-msg', 'mod', 'subscriber', 'turbo'].includes(key)
+				for(const key of Object.keys(tags))
+					userInfo[Tools.kebabCaseToCamelCase(key)] = isBoolField(key) ? tags[key] === '1' : tags[key]
+				
+				this.emit('msg_in', channel, userInfo, params[1].trim())
 				break
 			case 'RECONNECT':
 				this.reconnect()
