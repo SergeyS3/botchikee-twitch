@@ -1,5 +1,5 @@
 const Module = require('./Module')
-const MsgQueue = require('./submodules/MsgQueue')
+const MsgQueue = require('../submodules/MsgQueue')
 
 class Pyramid extends Module {
 	name = 'Pyramid'
@@ -13,13 +13,13 @@ class Pyramid extends Module {
 		
 		this.minWidth = minWidth || 3
 		
+		this.queue = this.getSubmoduleInstance(MsgQueue).queue
+		
 		this.msgIn = this.msgIn.bind(this)
 	}
 	
 	activate() {
 		super.activate()
-		
-		this.queue = this.getSubmoduleInstance(MsgQueue).queue
 		
 		this.Client.on('msg_in', this.msgIn)
 	}
@@ -28,21 +28,18 @@ class Pyramid extends Module {
 		super.deactivate()
 		
 		this.Client.off('msg_in', this.msgIn)
-		
-		this.queue = {}
 	}
-	
 	
 	async msgIn(channel, user, msg) {
-		if(user === this.Client.username || !this.checkChannel(channel) || !/^\w{3,15}$/.test(msg))
+		if(user.self || !this.checkChannel(channel) || !/^\w{3,15}$/.test(msg))
 			return
 		
-		const pyramidWidth = this.getPyramidWidth(this.queue[channel], user, msg)
+		const pyramidWidth = this.getPyramidWidth(this.queue[channel], user.name, msg)
 		if(pyramidWidth >= this.minWidth)
-			this.Client.say(channel, `nice ${pyramidWidth}-width ${msg} pyramid ${user} LUL`)
+			this.Client.say(channel, `nice ${pyramidWidth}-width ${msg} pyramid ${user.displayName} LUL`)
 	}
 	
-	getPyramidWidth(queue, builder, word) {
+	getPyramidWidth(queue, buildername, word) {
 		let checkWidth = 1
 		let pyramidWidth
 		let directionUp = true
@@ -50,8 +47,8 @@ class Pyramid extends Module {
 		queue = queue.slice()
 		queue.pop()
 		
-		for(const {user, msg} of queue.reverse()) {
-			if(user !== builder)
+		for(const { user, msg } of queue.reverse()) {
+			if(user.name !== buildername)
 				break
 			
 			const checkRow = () => msg === word + ` ${word}`.repeat(checkWidth - 1)

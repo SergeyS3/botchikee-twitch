@@ -1,5 +1,5 @@
 const Module = require('./Module')
-const CommandMsg = require('./submodules/CommandMsg')
+const CommandMsg = require('../submodules/CommandMsg')
 const Tools = require('../tools/Tools')
 
 class Select extends Module {
@@ -18,12 +18,11 @@ class Select extends Module {
 		]))
 	}
 	
-	selectCommand(channel, user, args) {
-		if(!args.length)
+	selectCommand(args, channel) {
+		if(args.length < 2)
 			return
 		
 		this.Client.say(channel, args[Tools.rand(0, args.length - 1)])
-			
 	}
 }
 

@@ -1,5 +1,5 @@
 const EventEmitter = require('events').EventEmitter
-const SubmoduleModel = require('../../models/submodule')
+const SubmoduleModel = require('../models/submodule')
 const debug = require('debug')('Submodule')
 
 class Submodule extends EventEmitter {

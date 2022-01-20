@@ -1,8 +1,6 @@
 const Module = require('./Module')
-const CommandMsg = require('./submodules/CommandMsg')
+const CommandMsg = require('../submodules/CommandMsg')
 const Client = require('../clients/Client')
-
-const users = require('../data/users')
 
 class Spam extends Module {
 	name = 'Spam'
@@ -22,7 +20,7 @@ class Spam extends Module {
 		]))
 	}
 	
-	async spamCommand(channel, user, args) {
+	async spamCommand(args, channel) {
 		if(!args.length)
 			return
 		

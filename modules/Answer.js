@@ -1,10 +1,8 @@
 const Module = require('./Module')
 const AnswerModel = require('../models/answer')
-const CommandMsg = require('./submodules/CommandMsg')
+const CommandMsg = require('../submodules/CommandMsg')
 const Tools = require('../tools/Tools')
 const debug = require('debug')('Answer module')
-
-const users = require('../data/users')
 
 class Answer extends Module {
 	name = 'Answer'
@@ -50,15 +48,15 @@ class Answer extends Module {
 	}
 	
 	msgIn(channel, user, msg) {
-		if(user === this.Client.username || !this.checkChannel(channel))
+		if(user.self || !this.checkChannel(channel))
 			return
 		
 		let {command, args} = CommandMsg.getCommand(msg)
 		const answer = this.answers.find(a => {
 			if(
 				!a.active
-				|| a.channels.length && !a.channels.includes(channel)
-				|| a.users.length && !a.users.includes(user)
+				|| !this.Client.checkChannel(channel, a.channels)
+				|| !this.Client.checkUser(user, a.users)
 			)
 				return
 			
@@ -72,22 +70,22 @@ class Answer extends Module {
 			}
 		})
 		if(answer)
-			this.answer(channel, answer.answer, user, args)
+			this.answer(channel, answer.answer, user.name, args)
 	}
 	
-	sayCommand(channel, user, args) {
-		this.answer(channel, args.join(' '), user, args)
+	sayCommand(args, channel, user) {
+		this.answer(channel, args.join(' '), user.name, args)
 	}
 	
-	answer(channel, answer, user, args) {
+	answer(channel, answer, username, args) {
 		try {
-			this.Client.say(channel, this.replaceVars(answer, user, args))
+			this.Client.say(channel, this.replaceVars(answer, username, args))
 		} catch (e) {
 			debug(`Error: ${e.message}`)
 		}
 	}
 	
-	replaceVars(answer, user, args) {
+	replaceVars(answer, sender, args) {
 		if(!answer)
 			return ''
 		
@@ -95,7 +93,7 @@ class Answer extends Module {
 		const replacements = new Map([
 		    [
 				'$sender',
-			    () => user
+			    () => sender
 			], [
 				/\$args{([^}]*)}/,
 				([,argN]) => {
@@ -141,7 +139,7 @@ class Answer extends Module {
 				break
 		}
 		
-		return replaceable ? this.replaceVars(answer.replace(replaceable, replacement), user, args) : answer
+		return replaceable ? this.replaceVars(answer.replace(replaceable, replacement), sender, args) : answer
 	}
 }
 
