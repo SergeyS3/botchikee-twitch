@@ -1,3 +1,5 @@
+const fs = require('fs')
+const path = require('path')
 const Module = require('./Module')
 const ModReplacementModel = require('../models/modReplacement')
 const ModBanWordModel = require('../models/modBanWord')
@@ -11,13 +13,14 @@ class Mod extends Module {
 		MsgQueue,
 		CommandMsg
 	]
+	predefinedReplacements = []
 	replacements = []
 	banWords = []
 	
 	constructor(Client) {
 		super(Client)
 		
-		this.setDataFromDB = this.setDataFromDB.bind(this)
+		this.setData = this.setData.bind(this)
 		this.checkMsg = this.checkMsg.bind(this)
 		this.addBanWordCommand = this.addBanWordCommand.bind(this)
 		
@@ -34,10 +37,10 @@ class Mod extends Module {
 	async activate() {
 		super.activate()
 		
-		await this.setDataFromDB()
+		await this.setData()
 		
-		this.replacementModelChangeStream.on('change', this.setDataFromDB)
-		this.banWordModelChangeStream.on('change', this.setDataFromDB)
+		this.replacementModelChangeStream.on('change', this.setData)
+		this.banWordModelChangeStream.on('change', this.setData)
 		
 		this.Client.on('msg_in', this.checkMsg)
 	}
@@ -47,11 +50,13 @@ class Mod extends Module {
 		
 		this.Client.off('msg_in', this.checkMsg)
 		
-		this.banWordModelChangeStream.off('change', this.setDataFromDB)
-		this.replacementModelChangeStream.off('change', this.setDataFromDB)
+		this.banWordModelChangeStream.off('change', this.setData)
+		this.replacementModelChangeStream.off('change', this.setData)
 	}
 	
-	async setDataFromDB() {
+	async setData() {
+		this.predefinedReplacements = await this.constructor.getPredefinedReplacements()
+		
 		this.replacements = (await ModReplacementModel.find())
 			.reduce((replacements, replacement) => {
 				replacement.from = this.replaceAll(replacement.from, replacements)
@@ -142,13 +147,24 @@ class Mod extends Module {
 				return ''
 		} while(prevText !== text)
 		
-		return [ ...text.matchAll(/[\p{L}\p{N}]+/ug) ].map(m => m[0]).join('')
+		text = [ ...text.matchAll(/[\p{L}\p{N}]+/ug) ].map(m => m[0]).join('')
+		
+		for(const replacement of this.predefinedReplacements)
+			text = text.replace(new RegExp(`[${replacement.from}]`, 'g'), replacement.to)
+		
+		return text
 	}
 	
 	replaceAll(text, replacements) {
 		for(const replacement of replacements)
 			text = text.replace(new RegExp(replacement.from, 'g'), replacement.to)
 		return text
+	}
+	
+	static async getPredefinedReplacements() {
+		return JSON.parse(
+			await fs.promises.readFile(path.join(__dirname, '../data/mod-replacements.json'), 'utf-8')
+		)
 	}
 }
 
