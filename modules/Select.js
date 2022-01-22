@@ -12,8 +12,10 @@ class Select extends Module {
 		super(Client)
 		
 		this.selectCommand = this.selectCommand.bind(this)
-		
-		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
+	}
+	
+	async init() {
+		await this.getSubmoduleInstance(CommandMsg).register(this, new Map([
 			['!select', this.selectCommand]
 		]))
 	}

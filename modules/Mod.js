@@ -28,8 +28,10 @@ class Mod extends Module {
 		this.banWordModelChangeStream = ModBanWordModel.watch()
 		
 		this.queue = this.getSubmoduleInstance(MsgQueue).queue
-		
-		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
+	}
+	
+	async init() {
+		await this.getSubmoduleInstance(CommandMsg).register(this, new Map([
 			['!banword', this.addBanWordCommand]
 		]))
 	}

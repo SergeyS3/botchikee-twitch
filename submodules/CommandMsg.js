@@ -1,10 +1,6 @@
 const Submodule = require('./Submodule')
 const CommandModel = require('../models/command')
 
-;(async () => { 
-	await CommandModel.updateMany({}, { $set: { registered: false } })
-})()
-
 class CommandMsg extends Submodule {
 	name = 'CommandMsg'
 	commands = []
@@ -81,6 +77,11 @@ class CommandMsg extends Submodule {
 	}
 	
 	async register(module, commands) {
+		if(!this.commandsReset) {
+			this.commandsReset = true
+			await CommandModel.updateMany({}, { $set: { registered: false } })
+		}
+		
 		for(const [text, handler] of commands) {
 			try {
 				this.commands.push({ module, text, handler })
