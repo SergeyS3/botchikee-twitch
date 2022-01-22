@@ -44,8 +44,11 @@ class ModularBot extends Client {
 		if(moduleManagement === 'db' || [...modules.keys()].find(m => m.usingDb)) 
 			await Tools.connectDB()
 		
-		for(const [moduleClass, moduleParams] of modules)
-			this.modules.push(new moduleClass(this, moduleParams))
+		for(const [moduleClass, moduleParams] of modules) {
+			const module = new moduleClass(this, moduleParams)
+			await module.init()
+			this.modules.push(module)
+		}
 		
 		await this.connect()
 		

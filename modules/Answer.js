@@ -19,8 +19,10 @@ class Answer extends Module {
 		this.setAnswersFromDB = this.setAnswersFromDB.bind(this)
 		
 		this.modelChangeStream = AnswerModel.watch()
-		
-		this.getSubmoduleInstance(CommandMsg).register(this, new Map([
+	}
+	
+	async init() {
+		await this.getSubmoduleInstance(CommandMsg).register(this, new Map([
 			['!say', this.sayCommand]
 		]))
 	}

@@ -16,6 +16,8 @@ class Module extends EventEmitter {
 		this.Client = Client
 	}
 	
+	init() {}
+	
 	activate() {
 		this.active = true
 		
