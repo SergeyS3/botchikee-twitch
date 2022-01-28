@@ -88,7 +88,9 @@ class Client extends EventEmitter {
 	}
 	
 	say(channel, msg, unsafe = false) {
-		if(!unsafe && ['.', '/'].includes(msg[0]))
+		const isTwitchCommand = ['.', '/'].includes(msg[0])
+		
+		if(!unsafe && isTwitchCommand)
 			msg = msg.substr(1)
 		
 		if(msg.length > 500) {
@@ -100,7 +102,9 @@ class Client extends EventEmitter {
 			return
 		}
 		
-		this.emit('msg_out', channel, msg)
+		if(!isTwitchCommand)
+			this.emit('msg_out', channel, msg)
+		
 		this.send(`PRIVMSG #${channel} :${msg}`)
 	}
 	
@@ -162,6 +166,9 @@ class Client extends EventEmitter {
 				break
 			case 'RECONNECT':
 				this.reconnect()
+				break
+			case 'CLEARCHAT':
+				this.emit('clear_chat', channel, user, tags)
 				break
 		}
 	}
