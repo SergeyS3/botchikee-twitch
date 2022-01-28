@@ -87,14 +87,9 @@ class Mod extends Module {
 		
 		try {
 			this.once('data_set', () => {
-				for(const { user, msg, timeouted } of this.queue[channel]) {
-					if(timeouted || this.checkMsg(channel, user, msg))
-						continue
-					
-					const sameUserMsgs = this.queue[channel].filter(mess => mess.user.name === user.name)
-					for(const sameUserMsg of sameUserMsgs)
-						sameUserMsg.timeouted = true
-				}
+				for(const { user, msg, deleted } of this.queue[channel])
+					if(!deleted && !this.checkMsg(channel, user, msg))
+						this.queue[channel].setDeleted(user.name)
 			})
 			
 			let banWord = await ModBanWordModel.findOne({ active: true, text })

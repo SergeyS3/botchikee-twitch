@@ -69,8 +69,8 @@ class Pyramid extends Module {
 		queue = queue.slice()
 		queue.pop()
 		
-		for(const { user, msg } of queue.reverse()) {
-			if(user.name !== username)
+		for(const { user, msg, deleted } of queue.reverse()) {
+			if(deleted || user.name !== username)
 				break
 			
 			const checkRow = () => msg === str + ` ${str}`.repeat(checkWidth - 1)
