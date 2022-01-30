@@ -153,14 +153,11 @@ class Client extends EventEmitter {
 				this.emit('part', channel, user)
 				break
 			case 'PRIVMSG':
-				const userInfo = {
+				const userInfo = Object.assign({
 					name: user,
 					self: user === this.username,
 					broadcaster: user === channel,
-				}
-				const isBoolField = key => ['first-msg', 'mod', 'subscriber', 'turbo'].includes(key)
-				for(const key of Object.keys(tags))
-					userInfo[Tools.kebabCaseToCamelCase(key)] = isBoolField(key) ? tags[key] === '1' : tags[key]
+				}, tags)
 				
 				this.emit('msg_in', channel, userInfo, params[1].trim())
 				break

@@ -64,7 +64,9 @@ class ModularBot extends Client {
 			ModuleModel.watch().on('change', this.setModulesFromDB)
 		}
 		else
-			await Promise.all(this.modules.map(() => module.activate()))
+			await Promise.all(
+				this.modules.map(m => m.activate())
+			)
 	}
 	
 	async setSettings(settings) {
