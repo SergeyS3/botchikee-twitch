@@ -1,16 +1,24 @@
-const {parse} = require('tekko')
+const { parse } = require('tekko')
+const Tools = require('./Tools')
 
 class IrcParser {
 	static parse(msg) {
 		const {tags, prefix, command, params} = parse(msg)
 		
+		const camelCaseTags = {}
+		if(tags) {
+			const isBoolField = key => ['first-msg', 'mod', 'subscriber', 'turbo'].includes(key)
+			for(const key of Object.keys(tags))
+				camelCaseTags[Tools.kebabCaseToCamelCase(key.replace('msg-param-', ''))] = isBoolField(key) ? tags[key] === '1' : tags[key]
+		}
+		
 		return {
 			raw: msg,
 			command,
 			channel: this.getChannel(command, params),
-			user: this.getUser(command, params, tags, prefix),
+			user: this.getUser(command, params, camelCaseTags, prefix),
 			params,
-			tags
+			tags: camelCaseTags
 		}
 	}
 	

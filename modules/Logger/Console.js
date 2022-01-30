@@ -43,7 +43,44 @@ class Console extends Logger {
 					terminalColor = this.userColors[user]
 				
 				msg = `${user} PRIVMSG ${params[1]}`
+				if(tags.bits)
+					msg = `(BITS ${tags.bits})`
+				
 				break
+			case 'CLEARCHAT':
+				msg = `CLEARCHAT ${user} ${tags.banDuration}`
+				break
+			case 'CLEARMSG':
+				msg = `CLEARMSG ${user} ${params[1]}`
+				break
+			case 'USERNOTICE':
+				const prefix = `${user} ${tags.msgId.toUpperCase()}`
+				switch(tags.msgId) {
+					case 'sub':
+						msg = prefix
+						break;
+					case 'resub':
+						msg = `${prefix} ${tags.cumulativeMonths}`
+						break;
+					case 'subgift':
+						msg = `${prefix} ${tags.giftMonths} ${tags.recipientDisplayName} (${tags.senderCount} total)`
+						break;
+					case 'submysterygift':
+						msg = `${prefix} ${tags.massGiftCount} (${tags.senderCount} total)`
+						break;
+					case 'giftpaidupgrade':
+						msg = `${prefix} (gifter: ${tags.senderName})`
+						break;
+					case 'bitsbadgetier':
+						msg = `${prefix} ${tags.threshold}`
+						break;
+					case 'rewardgift':
+						msg = `${prefix} ${params[1]}`
+						break;
+					case 'raid':
+						msg = `${prefix} ${tags.viewerCount}`
+						break;
+				}
 		}
 		if(!msg)
 			msg = raw
