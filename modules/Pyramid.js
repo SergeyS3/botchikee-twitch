@@ -50,7 +50,11 @@ class Pyramid extends Module {
 		if(msg.match(/^\w{3,15}$/) && msg.match(/\D/))
 			return true
 		
-		const emojisMatch = msg.match(emojiRegex)
+		return this.isEmoji(msg)
+	}
+	
+	static isEmoji(str) {
+		const emojisMatch = str.match(emojiRegex)
 		if(!emojisMatch)
 			return false
 		
@@ -65,6 +69,7 @@ class Pyramid extends Module {
 		let checkWidth = 1
 		let pyramidWidth
 		let directionUp = true
+		let isEmoji = this.isEmoji(str)
 		
 		queue = queue.slice()
 		queue.pop()
@@ -73,7 +78,9 @@ class Pyramid extends Module {
 			if(deleted || user.name !== username)
 				break
 			
-			const checkRow = () => msg === str + ` ${str}`.repeat(checkWidth - 1)
+			const checkRow = () => 
+				msg === str + ` ${str}`.repeat(checkWidth - 1)
+				|| isEmoji && msg === str.repeat(checkWidth)
 			
 			if(directionUp) {
 				checkWidth++
