@@ -42,12 +42,16 @@ class Pyramid extends Module {
 	
 	static canBeEmote(msg) {
 		if([
-			'D:', 'R)', ';p', ':p', ';)', ':\\', '<3', ':O', 'B-)',
-			'B)', 'O_o', ':|', '>(', ':D', ':-(', ':(', ':-)', ':)'
+			//twitch
+			'R)', ';p', ':p', ';)', ':\\', '<3', ':O', 'B-)', 'B)', 'O_o', ':|', '>(', ':D', ':-(', ':(', ':-)', ':)',
+			//bttv
+			'D:', ':tf:', 'M&Mjc',
+			//7tv
+			'EZ'
 		].includes(msg))
 			return true
 		
-		if(msg.match(/^\w{3,15}$/) && msg.match(/\D/))
+		if(msg.match(/^\w{3,100}$/) && msg.match(/\D/))
 			return true
 		
 		return this.isEmoji(msg)

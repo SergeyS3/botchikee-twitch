@@ -81,13 +81,13 @@ class Answer extends Module {
 	
 	answer(channel, answer, username, args) {
 		try {
-			this.Client.say(channel, this.replaceVars(answer, username, args))
+			this.Client.say(channel, this.constructor.replaceVars(answer, username, args))
 		} catch (e) {
 			debug(`Error: ${e.message}`)
 		}
 	}
 	
-	replaceVars(answer, sender, args) {
+	static replaceVars(answer, sender, args) {
 		if(!answer)
 			return ''
 		
@@ -99,7 +99,7 @@ class Answer extends Module {
 			], [
 				/\$args{([^}]*)}/,
 				([,argN]) => {
-					if(!args || !argN)
+					if(!args || !argN || typeof args[argN] !== 'string')
 						throw Error('bad $args args')
 					if(args[argN]?.includes('$args{')) //prevent recursion
 						throw Error('wrong $args args')

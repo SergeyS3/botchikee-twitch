@@ -8,7 +8,8 @@
     "start": "./start.sh",
     "dev": "nodemon . --ignore api/",
     "api": "./api/start.sh",
-    "api-dev": "nodemon api --watch api/"
+    "api-dev": "nodemon api --watch api/",
+    "test": "jest --runInBand"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +24,6 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "nodemon": "^2.0.14"
+    "jest": "^28.1.0"
   }
 }
